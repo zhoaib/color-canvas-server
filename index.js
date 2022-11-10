@@ -14,6 +14,15 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        res.status(401).send({ message: 'Unauthorized Access' })
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ASSESS_TOKEN_SECRET)
+}
+
 async function run() {
     try {
         const serviceCollection = client.db('colorCanvas').collection('services');
@@ -21,7 +30,8 @@ async function run() {
 
         app.post('/jwt', (req, res) => {
             const user = req.body;
-            console.log(user);
+            const token = jwt.sign(user, process.env.ASSESS_TOKEN_SECRET, { expiresIn: '1hr' })
+            res.send({ token })
         })
 
         app.get('/services', async (req, res) => {
@@ -45,7 +55,7 @@ async function run() {
             res.send(service);
         });
 
-        app.get('/reviews', async (req, res) => {
+        app.get('/reviews', verifyJWT, async (req, res) => {
             let query = {};
             if (req.query.email) {
                 query = {
