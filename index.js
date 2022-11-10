@@ -19,6 +19,11 @@ async function run() {
         const serviceCollection = client.db('colorCanvas').collection('services');
         const reviewCollection = client.db('colorCanvas').collection('reviews');
 
+        app.post('/jwt', (req, res) => {
+            const user = req.body;
+            console.log(user);
+        })
+
         app.get('/services', async (req, res) => {
             const query = {}
             const cursor = serviceCollection.find(query).limit(3);
