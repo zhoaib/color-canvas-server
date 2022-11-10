@@ -22,7 +22,7 @@ function verifyJWT(req, res, next) {
     const token = authHeader.split(' ')[1];
     jwt.verify(token, process.env.ASSESS_TOKEN_SECRET, function (err, decoded) {
         if (err) {
-            return res.status(403).send({ message: 'Unauthorized Access' })
+            return res.status(403).send({ message: 'Forbidden Access' })
         }
         req.decoded = decoded;
         next();
@@ -63,9 +63,9 @@ async function run() {
 
         app.get('/reviews', verifyJWT, async (req, res) => {
             const decoded = req.decoded;
-            console.log(decoded)
+
             if (decoded.email !== req.query.email) {
-                res.status(403).send({ message: 'Unauthorized Access' })
+                res.status(403).send({ message: 'Forbidden Access' })
             }
 
 
